@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AjaxManager Example</title>
+        <style>
+
+            .overlay {
+                background: #aaaaaa !important;
+                opacity: .60;
+                filter: Alpha(Opacity=60);
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            [class^="box"].active {
+                visibility: visible;
+                opacity: 1;
+                -moz-transform: none;
+                -ms-transform: none;
+                -webkit-transform: none;
+            }
+
+            [class^="box"] {
+                position: fixed;
+                z-index: 10000;
+                top: 50%;
+                left: 0;
+                width: 100%;
+                height: 0;
+                text-align: center;
+                visibility: hidden;
+                opacity: 0;
+
+            }
+
+            [class^="box"] > div.wrap {
+                display: inline-block;
+                zoom: 1;
+                text-align: left;
+                margin: auto;
+                background: white;
+                box-shadow: 0 0 6px rgba(0, 0, 0, 0.8), 0 0 0 1px #313131;
+                border: 1px solid rgba(0, 0, 0, 0.5);
+            }
+
+        </style>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+        <script type="text/javascript" src="ajaxmanager.js"></script>
+        <script type="text/javascript">
+            
+            function callSingle(){
+              
+                myajax.ajax({
+                    show_val : false,
+                    url :'test.php',
+                    data: {
+                        val : Math.round ( Math.random() * 100)
+                    },
+                    success: {
+                        error : {
+                            msg : 'Error msg form js ',
+                            callback: function(){
+                                alert('Function to be called where there is error!')
+                            }
+                        },
+                        before:function(){
+                            alert('Function to be called BEFORE Success!')
+                        },
+                        success:{
+                            msg : 'Success msg from js',
+                            callback: function(obj){
+                                alert('Function to be called where there is Success!')
+                                console.log(obj)
+                            }
+                        },
+                        after:function(){
+                            alert('Function to be called AFTER Success!')
+                        }
+                    }
+                });
+              
+            }
+            
+            /**
+             * Calling Queue
+             */
+            function callQueue(){
+                myajax.ajaxQueue({ queue: [ajaxOne(), ajaxTwo(), ajaxThree()] });
+            }
+            
+            /**
+             * Ajax one function
+             */
+            function ajaxOne(){
+              
+                myajax.ajax({
+                    show_val : false,
+                    url :'test.php',
+                    data: {
+                        val : Math.round ( Math.random() * 100)
+                    },
+                    success: {
+                        error : {
+                            msg : '',
+                            callback: function(){}
+                        },
+                        success:{
+                            msg : '',
+                            callback: function(obj){
+                                console.log(obj)
+                            }
+                        }
+                        
+                    }
+                });
+              
+            }
+            
+            /**
+             * Ajax twi function
+             */
+            function ajaxTwo(){
+              
+                myajax.ajax({
+                    show_val : false,
+                    url :'test.php',
+                    data: {
+                        val : Math.round ( Math.random() * 100)
+                    },
+                    success: {
+                        error : {
+                            msg : '',
+                            callback: function(){}
+                        },
+                        success:{
+                            msg : '',
+                            callback: function(obj){
+                                console.log(obj)
+                            }
+                        }
+                        
+                    }
+                });
+              
+            }
+            
+            /**
+             * Ajax three function
+             */
+            function ajaxThree(){
+              
+                myajax.ajax({
+                    show_val : false,
+                    url :'test.php',
+                    data: {
+                        val : Math.round ( Math.random() * 100)
+                    },
+                    success: {
+                        error : {
+                            msg : '',
+                            callback: function(){}
+                        },
+                        success:{
+                            msg : '',
+                            callback: function(obj){
+                                console.log(obj)
+                            }
+                        }
+                        
+                    }
+                });
+              
+            }
+            
+        </script>
+
+    </head>
+    <body>
+        <a href="#" onclick="callSingle()"> Run Single Ajax request</a>
+        <br />
+        <a href="#" onclick="callQueue()"> Run Queue Ajax request</a>
+        <br />
+
+    </body>
+</html>
