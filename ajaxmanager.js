@@ -43,7 +43,8 @@ function customException(value) {
  * ajax class
  * 
  * myajax.ajax({
-            show_val : false,
+            show_val : false, // to show error
+            cancel_pervious: true, // allow only last request to run in mulitiple requests
             url :'',
             data: {},
             success: {
@@ -185,6 +186,11 @@ AjaxManager.prototype = {
     },
     
     /**
+     * This is the ajax object which will hold the ajax object in it
+     */
+    ajaxObj : null,
+    
+    /**
      * Custom ajax call 
      * @param obj       will have all the values required for ajax call
      */
@@ -217,6 +223,11 @@ AjaxManager.prototype = {
         var error_call = function(){};
         var error_show = false;
         var loader_show = true;
+        var ajaxCancel = false;
+        
+        // canceling ajax call when they are called in queue
+        if(typeof obj.cancel_pervious != 'undefined')
+            ajaxCancel = obj.cancel_pervious;
         
         if(typeof obj.show_loader != 'undefined')
             loader_show = obj.show_loader;
@@ -258,187 +269,202 @@ AjaxManager.prototype = {
                     }
                     
                     /**
-                     * load the one loader for collection of ajax call
-                     * when the setvalue is 0 and when the value send by
-                     * caller is true
+                     * Ajax method
                      */
-                    if($this.setvalue == 0 && callerCheck == true && loader_show == true){
-                        $this.loading_loader(loader_text, 'main_call');
-                    }
+                    var ajaxCalled = function ajaxCalled(){
                     
-                    /**
-                     * will work only when there is collective ajax call
-                     */
-                    if(callerCheck == true){
-                        $this.setvalue++;
-                    //$this.log(" + " + $this.setvalue);
-                    }
-                    else if(loader_show == true){
-                        $this.loading_loader(loader_text, callerName);
-                    }
+                        /**
+                         * load the one loader for collection of ajax call
+                         * when the setvalue is 0 and when the value send by
+                         * caller is true
+                         */
+                        if($this.setvalue == 0 && callerCheck == true && loader_show == true){
+                            $this.loading_loader(loader_text, 'main_call');
+                        }
                     
-                    jQuery.ajax({
-                        url: baseurl + obj.url,
-                        type: obj.type,
-                        data: obj.data,
-                        success: function(data) {
+                        /**
+                         * will work only when there is collective ajax call
+                         */
+                        if(callerCheck == true){
+                            $this.setvalue++;
+                        //$this.log(" + " + $this.setvalue);
+                        }
+                        else if(loader_show == true){
+                            $this.loading_loader(loader_text, callerName);
+                        }
+                    
+                        jQuery.ajax({
+                            url: baseurl + obj.url,
+                            type: obj.type,
+                            data: obj.data,
+                            success: function(data) {
                         
-                            if(error_show == true)
-                                $this.log(obj);
+                                if(error_show == true)
+                                    $this.log(obj);
                             
-                            // called when the ajax data is just recieved
-                            if(typeof obj.success.before != 'undefined' && typeof obj.success.before == 'function'){
-                                obj.success.before();
-                            }
-                            
-                            try {
-                                var obj_ret = jQuery.parseJSON(data);
-                                
-                                /**
-                                 * error send by json and if it is not empty
-                                 * if the error is empty then it will show the error send by json
-                                 * and if the error is not send by json then it will show the error
-                                 * set in the ajax setup
-                                 */
-                                if(typeof obj_ret.error != 'undefined' && obj_ret.error != ""){
-                                    
-                                    if(error_show == true)
-                                        $this.log('error');
-                                    
-                                    // calling if the error callback function is set and there is an error
-                                    if(typeof obj.success.error.callback != 'undefined' && typeof obj.success.error.callback == 'function'){
-                                        
-                                        if(error_show == true){
-                                            $this.log('error callback function');
-                                            $this.log(obj.success.error.callback);
-                                        }
-                                        
-                                        error_call = obj.success.error.callback;
-                                    }
-                                    
-                                    /**
-                                     * this will getting up the call back method redirect
-                                     */
-                                    if(typeof obj_ret.error.redirect != 'undefined' && obj_ret.error.redirect != ""){
-                                        error_call = function(){
-                                            setTimeout(function(){
-                                                document.location = baseurl + obj_ret.error.redirect;
-                                            },100);
-                                        }
-                                    }
-                                    
-                                    // if the error send by json msg is set and not equal to empty
-                                    if(typeof obj_ret.error.msg != 'undefined' && obj_ret.error.msg != ""){
-                                        
-                                        if(error_show == true)
-                                            $this.log('error by json');
-                                        
-                                        $this.generateNoty(obj_ret.error.msg, 'error');
-                                        error_call(obj.success.error);
-                                    }
-                                    else{
-                                        // if 
-                                        if(typeof obj.success.error.msg != 'undefined' && obj.success.error.msg != ""){
-                                            
-                                            if(error_show == true)
-                                                $this.log('error by user');
-                                            
-                                            $this.generateNoty(obj.success.error.msg, 'error');
-                                            error_call(obj.success.error);
-                                        }
-                                    }
+                                // called when the ajax data is just recieved
+                                if(typeof obj.success.before != 'undefined' && typeof obj.success.before == 'function'){
+                                    obj.success.before();
                                 }
                             
-                                /**
-                                 * this will be send my the json and it will show the success message send my json
-                                 * and if json success is not set then it will show the success msg set in ajax call
-                                 * and if callback function is called where there is a success msg
-                                 */
-                                if(typeof obj_ret.success != 'undefined'){
+                                try {
+                                    var obj_ret = jQuery.parseJSON(data);
+                                
+                                    /**
+                                     * error send by json and if it is not empty
+                                     * if the error is empty then it will show the error send by json
+                                     * and if the error is not send by json then it will show the error
+                                     * set in the ajax setup
+                                     */
+                                    if(typeof obj_ret.error != 'undefined' && obj_ret.error != ""){
                                     
-                                    if(error_show == true)
-                                        $this.log('success');
+                                        if(error_show == true)
+                                            $this.log('error');
                                     
-                                    // if the callback is SET and is a function 
-                                    if(typeof obj.success.success.callback != 'undefined' && typeof obj.success.success.callback == 'function'){
+                                        // calling if the error callback function is set and there is an error
+                                        if(typeof obj.success.error.callback != 'undefined' && typeof obj.success.error.callback == 'function'){
                                         
-                                        if(error_show == true){
-                                            $this.log('success call method');
-                                            $this.log(obj.success.success.callback);
+                                            if(error_show == true){
+                                                $this.log('error callback function');
+                                                $this.log(obj.success.error.callback);
+                                            }
+                                        
+                                            error_call = obj.success.error.callback;
                                         }
-                                        
-                                        success_call = obj.success.success.callback;
-                                    }
                                     
-                                    // if the return json SUCCESS MSG is set and not empty
-                                    if(typeof obj_ret.success.msg != 'undefined' && obj_ret.success.msg != ""){
+                                        /**
+                                         * this will getting up the call back method redirect
+                                         */
+                                        if(typeof obj_ret.error.redirect != 'undefined' && obj_ret.error.redirect != ""){
+                                            error_call = function(){
+                                                setTimeout(function(){
+                                                    document.location = baseurl + obj_ret.error.redirect;
+                                                },100);
+                                            }
+                                        }
+                                    
+                                        // if the error send by json msg is set and not equal to empty
+                                        if(typeof obj_ret.error.msg != 'undefined' && obj_ret.error.msg != ""){
                                         
-                                        if(error_show == true)
-                                            $this.log('success msg by user');
-                                        
-                                        $this.generateNoty(obj_ret.success.msg, 'success');
-                                        //success_call(obj.success.success);
-                                        success_call(obj_ret.success);
-                                    }
-                                    else{
-                                        if(error_show == true)
-                                            $this.log('success else');
-                                        
-                                        // if js SUCCESS MSG is set and not empty
-                                        if(typeof obj.success.success.msg != 'undefined' && obj.success.success.msg != ""){
-                                            
                                             if(error_show == true)
-                                                $this.log('success msg by json');
+                                                $this.log('error by json');
+                                        
+                                            $this.generateNoty(obj_ret.error.msg, 'error');
+                                            error_call(obj.success.error);
+                                        }
+                                        else{
+                                            // if 
+                                            if(typeof obj.success.error.msg != 'undefined' && obj.success.error.msg != ""){
                                             
-                                            $this.generateNoty(obj.success.success.msg, 'success');
+                                                if(error_show == true)
+                                                    $this.log('error by user');
+                                            
+                                                $this.generateNoty(obj.success.error.msg, 'error');
+                                                error_call(obj.success.error);
+                                            }
+                                        }
+                                    }
+                            
+                                    /**
+                                     * this will be send my the json and it will show the success message send my json
+                                     * and if json success is not set then it will show the success msg set in ajax call
+                                     * and if callback function is called where there is a success msg
+                                     */
+                                    if(typeof obj_ret.success != 'undefined'){
+                                    
+                                        if(error_show == true)
+                                            $this.log('success');
+                                    
+                                        // if the callback is SET and is a function 
+                                        if(typeof obj.success.success.callback != 'undefined' && typeof obj.success.success.callback == 'function'){
+                                        
+                                            if(error_show == true){
+                                                $this.log('success call method');
+                                                $this.log(obj.success.success.callback);
+                                            }
+                                        
+                                            success_call = obj.success.success.callback;
+                                        }
+                                    
+                                        // if the return json SUCCESS MSG is set and not empty
+                                        if(typeof obj_ret.success.msg != 'undefined' && obj_ret.success.msg != ""){
+                                        
+                                            if(error_show == true)
+                                                $this.log('success msg by user');
+                                        
+                                            $this.generateNoty(obj_ret.success.msg, 'success');
                                             //success_call(obj.success.success);
                                             success_call(obj_ret.success);
                                         }
-                                        
-                                        // if return SUCCESS MSG is not set or it is emtpy
-                                        if(typeof obj_ret.success.msg == 'undefined' || obj_ret.success.msg == ""){
-                                            
+                                        else{
                                             if(error_show == true)
-                                                $this.log('success else call');
+                                                $this.log('success else');
+                                        
+                                            // if js SUCCESS MSG is set and not empty
+                                            if(typeof obj.success.success.msg != 'undefined' && obj.success.success.msg != ""){
                                             
-                                            success_call(obj_ret.success);
+                                                if(error_show == true)
+                                                    $this.log('success msg by json');
+                                            
+                                                $this.generateNoty(obj.success.success.msg, 'success');
+                                                //success_call(obj.success.success);
+                                                success_call(obj_ret.success);
+                                            }
+                                        
+                                            // if return SUCCESS MSG is not set or it is emtpy
+                                            if(typeof obj_ret.success.msg == 'undefined' || obj_ret.success.msg == ""){
+                                            
+                                                if(error_show == true)
+                                                    $this.log('success else call');
+                                            
+                                                success_call(obj_ret.success);
+                                            }
                                         }
                                     }
-                                }
                                 
-                            }
-                            catch (e) {
-                                $this.log(data)
-                                $this.generateNoty('Something went wrong, Please try agin in few minutes!', 'error');
-                            }
-                            
-                            /**
-                             * callerCheck is send by the queue function for showing only one loader 
-                             * and decrease the total count of ajax called made and 
-                             * deactivating the custom value once the ajax call is finished
-                             * and show close loader when all the ajax call are finished
-                             */
-                            if(callerCheck == true){
-                                //$this.log(" - " + $this.setvalue + " "+ obj.url);
-                                $this.setvalue--;
-                                arguments.callee.caller.val = false;
-                                if($this.setvalue == 0){
-                                    unloading_loader('main_call');
                                 }
-                            }
-                            // close single loader when the single ajax call is finsishded
-                            else if(loader_show == true){
-                                unloading_loader(callerName);
-                            }
+                                catch (e) {
+                                    $this.log(data)
+                                    $this.generateNoty('Something went wrong, Please try agin in few minutes!', 'error');
+                                }
                             
-                            // calling the method which will be called after the ajax obj is recieved
-                            if(typeof obj.success.after != 'undefined' && typeof obj.success.after == 'function'){
-                                obj.success.after();
-                            }
+                                /**
+                                 * callerCheck is send by the queue function for showing only one loader 
+                                 * and decrease the total count of ajax called made and 
+                                 * deactivating the custom value once the ajax call is finished
+                                 * and show close loader when all the ajax call are finished
+                                 */
+                                if(callerCheck == true){
+                                    //$this.log(" - " + $this.setvalue + " "+ obj.url);
+                                    $this.setvalue--;
+                                    arguments.callee.caller.val = false;
+                                    if($this.setvalue == 0){
+                                        unloading_loader('main_call');
+                                    }
+                                }
+                                // close single loader when the single ajax call is finsishded
+                                else if(loader_show == true){
+                                    unloading_loader(callerName);
+                                }
                             
-                        }
-                    })
-                
+                                // calling the method which will be called after the ajax obj is recieved
+                                if(typeof obj.success.after != 'undefined' && typeof obj.success.after == 'function'){
+                                    obj.success.after();
+                                }
+                            
+                            }
+                        })
+                        
+                    }// ajaxCalled
+                    
+                    // checking if the settimeout has request then remove it
+                    if($this.ajaxObj && ajaxCancel == true){
+                        clearTimeout($this.ajaxObj)
+                    }
+                    
+                    // if ajaxCancel then wait else continue
+                    $this.ajaxObj = setTimeout(ajaxCalled , (ajaxCancel == true) ? 500 : 10 ); //
+                    
                 }
             }
         }

@@ -175,6 +175,35 @@
               
             }
             
+            /**
+             * Ajax input function
+             */
+            function ajaxInput(val){
+              
+                myajax.ajax({
+                    show_val : false,
+                    cancel_pervious: true,
+                    url :'ajax.php',
+                    data: {
+                        val : val
+                    },
+                    success: {
+                        error : {
+                            msg : '',
+                            callback: function(){}
+                        },
+                        success:{
+                            msg : '',
+                            callback: function(obj){
+                                $("#show_value").after("<span>"+obj.val+"</span>")
+                            }
+                        }
+                        
+                    }
+                });
+              
+            }
+            
         </script>
 
     </head>
@@ -183,6 +212,8 @@
         <br />
         <a href="#" onclick="callQueue()"> Run Queue Ajax request</a>
         <br />
-
+        Ajax call will occur after every keypress it will be after the user has stopped <br />
+        <input type="text" value="" id="ajaxinput" onkeyup="ajaxInput(this.value)"><span id="show_value"></span>
+        <br />
     </body>
 </html>
