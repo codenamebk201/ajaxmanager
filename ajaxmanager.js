@@ -394,7 +394,21 @@ AjaxManager.prototype = {
                                         
                                             $this.generateNoty(obj_ret.success.msg, 'success');
                                             //success_call(obj.success.success);
-                                            success_call(obj_ret.success);
+                                            //success_call(obj_ret.success);
+
+                                            // checking if the js msg is empty or not
+                                            // other send the user msg to the callback method
+                                            if(typeof obj.success.success.msg != 'undefined' && obj.success.success.msg != ""){
+                                                if(error_show == true)
+                                                    $this.log('send retrun value from js');
+                                                success_call(obj.success.success);
+                                            }
+                                            else{
+                                                if(error_show == true)
+                                                    $this.log('send retrun value from user');
+                                                success_call(obj_ret.success);
+                                            }
+
                                         }
                                         else{
                                             if(error_show == true)
