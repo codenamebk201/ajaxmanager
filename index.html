@@ -51,13 +51,13 @@
         <script type="text/javascript" src="ajaxmanager.js"></script>
         <script type="text/javascript">
             
-            function callSingle(){
+            function callSingle(val){
               
                 myajax.ajax({
                     show_val : false,
                     url :'test.php',
                     data: {
-                        val : Math.round ( Math.random() * 100)
+                        val : val 
                     },
                     success: {
                         error : {
@@ -82,6 +82,20 @@
                     }
                 });
               
+            }
+            
+            /**
+             * Success call
+             */
+            function successCall(){
+                callSingle(51)
+            }
+            
+            /**
+             * Error call
+             */
+            function errorCall(){
+                callSingle(13)
             }
             
             /**
@@ -208,10 +222,18 @@
 
     </head>
     <body>
-        <a href="#" onclick="callSingle()"> Run Single Ajax request</a>
         <br />
+        <p>
+            AjaxManager is an extended version of jquery ajax method, this class takes care of error by itself and also have the functionality to add custom error and success
+            messages. There are both success and error callback method which can be set and will be called when they are triggered. Success callback will be called when there 
+            ajax request is success and error callback will be called when there is an error sent my the user.
+        </p>
+        <a href="#" onclick="successCall()"> Run Single Success Ajax request</a>
+        <br />
+        <a href="#" onclick="errorCall()"> Run Single Error Ajax request</a>
+        <br /><br />
         <a href="#" onclick="callQueue()"> Run Queue Ajax request</a>
-        <br />
+        <br /><br />
         Ajax call will occur after every keypress it will be after the user has stopped <br />
         <input type="text" value="" id="ajaxinput" onkeyup="ajaxInput(this.value)"><span id="show_value"></span>
         <br />
