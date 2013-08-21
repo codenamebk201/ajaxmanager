@@ -300,6 +300,24 @@ AjaxManager.prototype = {
                             $this.loading_loader(loader_text, callerName);
                         }
                         
+                        // Success msg Storage value
+                        var showMsg = {
+                            error:null,
+                            success:null
+                        };
+                                    
+                        // sending param to callback method
+                        var sendParam = {
+                            error:null,
+                            success:null
+                        };
+                                    
+                        // call back for error and success
+                        var callback = {
+                            error:function(){},
+                            success:function(){}
+                        };
+                        
                         var call_url = obj.url;
                         jQuery.ajax({
                             url: baseurl + obj.url,
@@ -315,24 +333,6 @@ AjaxManager.prototype = {
                                 try {
                                     var obj_ret = jQuery.parseJSON(data);
                                 
-                                    // Success msg Storage value
-                                    var showMsg = {
-                                        error:null,
-                                        success:null
-                                    };
-                                    
-                                    // sending param to callback method
-                                    var sendParam = {
-                                        error:null,
-                                        success:null
-                                    };
-                                    
-                                    // call back for error and success
-                                    var callback = {
-                                        error:function(){},
-                                        success:function(){}
-                                    };
-                                    
                                     /**
                                      * this will be send my the json and it will show the success message send my json
                                      * and if json success is not set then it will show the success msg set in ajax call
