@@ -47,9 +47,12 @@
             }
 
         </style>
+        <!-- baseurl -->
+        <script type="text/javascript">var baseurls = "http://localhost/github/ajaxmanager/";</script>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
         <script type="text/javascript" src="ajaxmanager.js"></script>
         <script type="text/javascript">
+        
             
             function callSingle(val){
               
@@ -63,21 +66,21 @@
                         error : {
                             msg : 'Error msg form js ',
                             callback: function(){
-                                alert('Function to be called where there is error!')
+                                alert('Function called at error!')
                             }
                         },
                         before:function(){
-                            alert('Function to be called BEFORE Success!')
+                            alert('Function called BEFORE Success!')
                         },
                         success:{
                             msg : 'Success msg from js',
                             callback: function(obj){
-                                alert('Function to be called where there is Success!')
+                                alert('Function called at Success!')
                                 console.log(obj)
                             }
                         },
                         after:function(){
-                            alert('Function to be called AFTER Success!')
+                            alert('Function called AFTER Success!')
                         }
                     }
                 });

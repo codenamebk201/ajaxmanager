@@ -1,14 +1,12 @@
-
-var baseurl = "http://localhost/my/ajaxmanger/";
     
 /**
  * Extend method to extend the child with parent properties
  */
-function extend(Child, Parent){
-    Child.prototype = Parent.prototype;
-    Child.prototype.constructor = Child;
-    Child.base = Parent.prototype;
-}
+// function extend(Child, Parent){
+//     Child.prototype = Parent.prototype;
+//     Child.prototype.constructor = Child;
+//     Child.base = Parent.prototype;
+// }
 
 /**
  * Custom Exception
@@ -207,6 +205,10 @@ AjaxManager.prototype = {
         
         var $this = this;
         
+        if(typeof baseurl == 'undefined'){
+            baseurl = document.location.origin + document.location.pathname;
+        }
+
         var callerCheck = false;
         
         /**
@@ -325,10 +327,12 @@ AjaxManager.prototype = {
                             data: obj.data,
                             success: function(data) {
                         
-                                if(error_show == true)
-                                    $this.log(obj);
-                            
-                               
+                                /**
+                                 * Showing error when succes method starts
+                                 */
+                                if(error_show == true){
+                                    $this.log("Success Start");
+                                }
                             
                                 try {
                                     var obj_ret = jQuery.parseJSON(data);
@@ -491,9 +495,9 @@ AjaxManager.prototype = {
                                 catch (e) {
                                     $this.log(data)
                                     if(error_show == true)
-                                        $this.generateNoty('Something went wrong, Please try agin in few minutes! '+call_url+"<br>"+e.toString(), 'error');
+                                        $this.generateNoty('Something went wrong, Please report bug! '+call_url+"<br>"+e.toString(), 'error');
                                     else
-                                        $this.generateNoty('Something went wrong, Please try agin in few minutes! ', 'error');
+                                        $this.generateNoty('Something went wrong, Please report bug! ', 'error');
                                 }
                             
                                 /**
